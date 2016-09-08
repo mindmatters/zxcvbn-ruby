@@ -16,8 +16,8 @@ module Zxcvbn
   #   tester.test("password 2")
   #   tester.test("password 3")
   class Tester
-    def initialize
-      @data = Data.new
+    def initialize(languages=['en'])
+      @data = Data.new(languages)
     end
 
     def test(password, user_inputs = [])

@@ -3,13 +3,14 @@ require 'zxcvbn/dictionary_ranker'
 
 module Zxcvbn
   class Data
-    def initialize
+    def initialize(languages)
+      @languages = languages
       @ranked_dictionaries = DictionaryRanker.rank_dictionaries(
-        "english" =>      read_word_list("english.txt"),
-        "female_names" => read_word_list("female_names.txt"),
-        "male_names" =>   read_word_list("male_names.txt"),
-        "passwords" =>    read_word_list("passwords.txt"),
-        "surnames" =>     read_word_list("surnames.txt")
+        "words" =>        read_word_lists("words.txt"),
+        "female_names" => read_word_lists("female_names.txt"),
+        "male_names" =>   read_word_lists("male_names.txt"),
+        "passwords" =>    read_word_lists("passwords.txt"),
+        "surnames" =>     read_word_lists("surnames.txt")
       )
       @adjacency_graphs = JSON.load(DATA_PATH.join('adjacency_graphs.json').read)
     end
@@ -22,8 +23,16 @@ module Zxcvbn
 
     private
 
-    def read_word_list(file)
-      DATA_PATH.join("frequency_lists", file).read.split
+    def read_word_lists(file)
+      word_lists = @languages.map do |language|
+        read_word_list(file, language)
+      end
+      word_lists[0].zip(*word_lists[1..-1]).flatten.compact
+    end
+
+    def read_word_list(file, language)
+      filename = DATA_PATH.join("frequency_lists", language, file)
+      File.file?(filename) ? filename.read.split : []
     end
   end
 end
